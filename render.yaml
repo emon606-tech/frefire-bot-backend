@@ -2,7 +2,7 @@ services:
   - type: web
     name: frefire-bot-backend
     env: node
-    buildCommand: npm ci --production
+    buildCommand: npm run build
     startCommand: npm start
     envVars:
       - key: NODE_ENV
@@ -11,5 +11,9 @@ services:
         value: 10000
       - key: NODE_VERSION
         value: "20"
+      - key: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD
+        value: "false"
+      - key: PUPPETEER_EXECUTABLE_PATH
+        value: "/opt/render/project/src/node_modules/puppeteer/.local-chromium/linux-*/chrome-linux/chrome"
     healthCheckPath: /api/bot/health
     autoDeploy: true 
