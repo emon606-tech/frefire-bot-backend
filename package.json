@@ -1,0 +1,42 @@
+{
+  "name": "frefire-bot-backend",
+  "version": "1.0.0",
+  "description": "Bot server for scraping real Free Fire player data from Garena official website (shop.garena.sg)",
+  "main": "bot_server.js",
+  "scripts": {
+    "start": "node bot_server.js",
+    "dev": "nodemon bot_server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "free-fire",
+    "garena",
+    "bot",
+    "scraping",
+    "puppeteer",
+    "player-lookup",
+    "web-automation",
+    "shop.garena.sg"
+  ],
+  "author": "emonxxx11",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "puppeteer": "^21.5.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": "^18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/emon606-tech/frefire-bot-backend"
+  },
+  "bugs": {
+    "url": "https://github.com/emon606-tech/frefire-bot-backend/issues"
+  },
+  "homepage": "https://emonxxx11.github.io/frefire-bot"
+} 
