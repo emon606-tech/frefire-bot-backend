@@ -7,7 +7,8 @@
     "start": "node bot_server.js",
     "dev": "nodemon bot_server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "node -e \"console.log('Build completed successfully!')\""
+    "postinstall": "npx puppeteer browsers install chrome",
+    "build": "npx puppeteer browsers install chrome"
   },
   "keywords": [
     "free-fire",
