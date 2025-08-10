@@ -7,9 +7,11 @@
     "start": "node bot_server.js",
     "dev": "nodemon bot_server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "npx puppeteer browsers install chrome || echo 'Chrome installation failed, will use system Chrome'",
-    "build": "npm install && npx puppeteer browsers install chrome || echo 'Chrome installation failed, will use system Chrome'",
-    "verify-chrome": "node verify_build.js"
+    "preinstall": "mkdir -p /opt/render/project/src/node_modules/.cache/puppeteer || echo 'Cache directory creation failed'",
+    "postinstall": "npx puppeteer browsers install chrome --path /opt/render/project/src/node_modules/.cache/puppeteer || echo 'Chrome installation failed'",
+    "build": "chmod +x build.sh && ./build.sh",
+    "verify-chrome": "node verify_build.js",
+    "install-chrome": "npx puppeteer browsers install chrome --path /opt/render/project/src/node_modules/.cache/puppeteer"
   },
   "keywords": [
     "free-fire",
