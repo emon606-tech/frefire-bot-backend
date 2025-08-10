@@ -3,33 +3,33 @@
 echo "🚀 Starting build process..."
 
 # Check Node.js version
-echo "📋 Checking Node.js version..."
-node --version
-npm --version
+echo "📋 Node.js version: $(node --version)"
+echo "📋 NPM version: $(npm --version)"
 
-# Clean install
+# Clean previous installations
 echo "🧹 Cleaning previous installations..."
-rm -rf node_modules package-lock.json yarn.lock
+rm -rf node_modules package-lock.json
 
 # Install dependencies
 echo "📦 Installing dependencies..."
-npm install --production
+npm install
 
-# Verify installation
-echo "✅ Verifying installation..."
-if [ -f "bot_server.js" ]; then
-    echo "✅ bot_server.js found"
+# Create cache directory
+echo "📁 Creating cache directory..."
+mkdir -p /opt/render/project/src/node_modules/.cache/puppeteer
+
+# Install Chrome
+echo "🌐 Installing Chrome..."
+npx puppeteer browsers install chrome --path /opt/render/project/src/node_modules/.cache/puppeteer
+
+# Verify Chrome installation
+echo "✅ Verifying Chrome installation..."
+if [ -f "/opt/render/project/src/node_modules/.cache/puppeteer/chrome-linux-*/chrome-linux/chrome" ]; then
+    echo "✅ Chrome found!"
+    ls -la /opt/render/project/src/node_modules/.cache/puppeteer/
 else
-    echo "❌ bot_server.js not found"
-    exit 1
+    echo "⚠️ Chrome not found in expected location"
+    find /opt/render/project/src/node_modules -name "chrome" -type f 2>/dev/null || echo "No Chrome found anywhere"
 fi
 
-if [ -d "node_modules" ]; then
-    echo "✅ node_modules directory created"
-else
-    echo "❌ node_modules directory not created"
-    exit 1
-fi
-
-echo "🎉 Build completed successfully!"
-echo "🚀 Ready to start server with: npm start" 
+echo "🏁 Build process completed!" 
