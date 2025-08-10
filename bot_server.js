@@ -45,10 +45,13 @@ async function scrapeGarenaPlayer(uid) {
         
         // Launch browser with enhanced settings for React SPA
         let browser;
+        let launchMethod = 'unknown';
+        
+        // Strategy 1: Try with Puppeteer's built-in Chrome
         try {
+            console.log(`🚀 Strategy 1: Trying Puppeteer's built-in Chrome...`);
             browser = await puppeteer.launch({
                 headless: true,
-                executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
                 args: [
                     '--no-sandbox',
                     '--disable-setuid-sandbox',
@@ -66,31 +69,163 @@ async function scrapeGarenaPlayer(uid) {
                     '--disable-ipc-flooding-protection'
                 ]
             });
+            launchMethod = 'puppeteer-builtin';
+            console.log(`✅ Strategy 1 successful: Using Puppeteer's built-in Chrome`);
         } catch (error) {
-            console.log(`⚠️ Primary Chrome launch failed: ${error.message}`);
-            console.log(`🔄 Trying fallback launch without executable path...`);
+            console.log(`⚠️ Strategy 1 failed: ${error.message}`);
             
-            // Fallback: try without executable path
-            browser = await puppeteer.launch({
-                headless: true,
-                args: [
-                    '--no-sandbox',
-                    '--disable-setuid-sandbox',
-                    '--disable-dev-shm-usage',
-                    '--disable-accelerated-2d-canvas',
-                    '--no-first-run',
-                    '--no-zygote',
-                    '--disable-gpu',
-                    '--disable-web-security',
-                    '--disable-features=VizDisplayCompositor',
-                    '--disable-background-timer-throttling',
-                    '--disable-backgrounding-occluded-windows',
-                    '--disable-renderer-backgrounding',
-                    '--disable-features=TranslateUI',
-                    '--disable-ipc-flooding-protection'
-                ]
-            });
+            // Strategy 2: Try with system Chrome
+            try {
+                console.log(`🚀 Strategy 2: Trying system Chrome...`);
+                browser = await puppeteer.launch({
+                    headless: true,
+                    executablePath: '/usr/bin/google-chrome',
+                    args: [
+                        '--no-sandbox',
+                        '--disable-setuid-sandbox',
+                        '--disable-dev-shm-usage',
+                        '--disable-accelerated-2d-canvas',
+                        '--no-first-run',
+                        '--no-zygote',
+                        '--disable-gpu',
+                        '--disable-web-security',
+                        '--disable-features=VizDisplayCompositor',
+                        '--disable-background-timer-throttling',
+                        '--disable-backgrounding-occluded-windows',
+                        '--disable-renderer-backgrounding',
+                        '--disable-features=TranslateUI',
+                        '--disable-ipc-flooding-protection'
+                    ]
+                });
+                launchMethod = 'system-chrome';
+                console.log(`✅ Strategy 2 successful: Using system Chrome`);
+            } catch (error2) {
+                console.log(`⚠️ Strategy 2 failed: ${error2.message}`);
+                
+                // Strategy 3: Try with Chromium
+                try {
+                    console.log(`🚀 Strategy 3: Trying Chromium...`);
+                    browser = await puppeteer.launch({
+                        headless: true,
+                        executablePath: '/usr/bin/chromium-browser',
+                        args: [
+                            '--no-sandbox',
+                            '--disable-setuid-sandbox',
+                            '--disable-dev-shm-usage',
+                            '--disable-accelerated-2d-canvas',
+                            '--no-first-run',
+                            '--no-zygote',
+                            '--disable-gpu',
+                            '--disable-web-security',
+                            '--disable-features=VizDisplayCompositor',
+                            '--disable-background-timer-throttling',
+                            '--disable-backgrounding-occluded-windows',
+                            '--disable-renderer-backgrounding',
+                            '--disable-features=TranslateUI',
+                            '--disable-ipc-flooding-protection'
+                        ]
+                    });
+                    launchMethod = 'chromium';
+                    console.log(`✅ Strategy 3 successful: Using Chromium`);
+                } catch (error3) {
+                    console.log(`⚠️ Strategy 3 failed: ${error3.message}`);
+                    
+                    // Strategy 4: Try with any available Chrome-like browser
+                    try {
+                        console.log(`🚀 Strategy 4: Trying to find any Chrome-like browser...`);
+                        
+                        // List common Chrome paths
+                        const chromePaths = [
+                            '/usr/bin/google-chrome',
+                            '/usr/bin/google-chrome-stable',
+                            '/usr/bin/chromium-browser',
+                            '/usr/bin/chromium',
+                            '/snap/bin/chromium',
+                            '/opt/google/chrome/chrome',
+                            process.env.PUPPETEER_EXECUTABLE_PATH
+                        ].filter(Boolean);
+                        
+                        console.log(`🔍 Checking Chrome paths: ${chromePaths.join(', ')}`);
+                        
+                        let foundChrome = false;
+                        for (const chromePath of chromePaths) {
+                            try {
+                                const fs = require('fs');
+                                if (fs.existsSync(chromePath)) {
+                                    console.log(`✅ Found Chrome at: ${chromePath}`);
+                                    browser = await puppeteer.launch({
+                                        headless: true,
+                                        executablePath: chromePath,
+                                        args: [
+                                            '--no-sandbox',
+                                            '--disable-setuid-sandbox',
+                                            '--disable-dev-shm-usage',
+                                            '--disable-accelerated-2d-canvas',
+                                            '--no-first-run',
+                                            '--no-zygote',
+                                            '--disable-gpu',
+                                            '--disable-web-security',
+                                            '--disable-features=VizDisplayCompositor',
+                                            '--disable-background-timer-throttling',
+                                            '--disable-backgrounding-occluded-windows',
+                                            '--disable-renderer-backgrounding',
+                                            '--disable-features=TranslateUI',
+                                            '--disable-ipc-flooding-protection'
+                                        ]
+                                    });
+                                    launchMethod = `custom-path:${chromePath}`;
+                                    console.log(`✅ Strategy 4 successful: Using Chrome at ${chromePath}`);
+                                    foundChrome = true;
+                                    break;
+                                }
+                            } catch (e) {
+                                console.log(`⚠️ Chrome path ${chromePath} failed: ${e.message}`);
+                                continue;
+                            }
+                        }
+                        
+                        if (!foundChrome) {
+                            throw new Error('No Chrome-like browser found in common paths');
+                        }
+                        
+                    } catch (error4) {
+                        console.log(`⚠️ Strategy 4 failed: ${error4.message}`);
+                        
+                        // Final fallback: Try without any executable path
+                        console.log(`🚀 Final fallback: Trying without executable path...`);
+                        try {
+                            browser = await puppeteer.launch({
+                                headless: true,
+                                args: [
+                                    '--no-sandbox',
+                                    '--disable-setuid-sandbox',
+                                    '--disable-dev-shm-usage',
+                                    '--disable-accelerated-2d-canvas',
+                                    '--no-first-run',
+                                    '--no-zygote',
+                                    '--disable-gpu',
+                                    '--disable-web-security',
+                                    '--disable-features=VizDisplayCompositor',
+                                    '--disable-background-timer-throttling',
+                                    '--disable-backgrounding-occluded-windows',
+                                    '--disable-renderer-backgrounding',
+                                    '--disable-features=TranslateUI',
+                                    '--disable-ipc-flooding-protection'
+                                ]
+                            });
+                            launchMethod = 'fallback-no-path';
+                            console.log(`✅ Final fallback successful: Using default launch`);
+                        } catch (finalError) {
+                            console.error(`❌ All launch strategies failed!`);
+                            console.error(`Final error: ${finalError.message}`);
+                            throw new Error(`All browser launch strategies failed. Last error: ${finalError.message}`);
+                        }
+                    }
+                }
+            }
         }
+        
+        console.log(`🎯 Browser launched successfully using method: ${launchMethod}`);
 
         const page = await browser.newPage();
         
@@ -634,6 +769,87 @@ app.post('/api/bot/scrape', async (req, res) => {
     }
 });
 
+// System check endpoint for debugging
+app.get('/api/bot/system-check', async (req, res) => {
+    try {
+        console.log('🔍 System check endpoint called');
+        
+        const fs = require('fs');
+        const path = require('path');
+        
+        // Check common Chrome paths
+        const chromePaths = [
+            '/usr/bin/google-chrome',
+            '/usr/bin/google-chrome-stable',
+            '/usr/bin/chromium-browser',
+            '/usr/bin/chromium',
+            '/snap/bin/chromium',
+            '/opt/google/chrome/chrome',
+            process.env.PUPPETEER_EXECUTABLE_PATH
+        ].filter(Boolean);
+        
+        const chromeStatus = {};
+        for (const chromePath of chromePaths) {
+            try {
+                if (fs.existsSync(chromePath)) {
+                    const stats = fs.statSync(chromePath);
+                    chromeStatus[chromePath] = {
+                        exists: true,
+                        size: stats.size,
+                        permissions: stats.mode.toString(8),
+                        modified: stats.mtime
+                    };
+                } else {
+                    chromeStatus[chromePath] = { exists: false };
+                }
+            } catch (e) {
+                chromeStatus[chromePath] = { exists: false, error: e.message };
+            }
+        }
+        
+        // Check Puppeteer installation
+        let puppeteerInfo = {};
+        try {
+            const puppeteer = require('puppeteer');
+            puppeteerInfo = {
+                version: puppeteer.version,
+                executablePath: puppeteer.executablePath(),
+                executableExists: fs.existsSync(puppeteer.executablePath())
+            };
+        } catch (e) {
+            puppeteerInfo = { error: e.message };
+        }
+        
+        // Check system info
+        const systemInfo = {
+            nodeVersion: process.version,
+            platform: process.platform,
+            arch: process.arch,
+            env: {
+                NODE_ENV: process.env.NODE_ENV,
+                PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: process.env.PUPPETEER_SKIP_CHROMIUM_DOWNLOAD,
+                PUPPETEER_EXECUTABLE_PATH: process.env.PUPPETEER_EXECUTABLE_PATH
+            }
+        };
+        
+        res.json({
+            success: true,
+            chromeStatus,
+            puppeteerInfo,
+            systemInfo,
+            timestamp: new Date().toISOString()
+        });
+        
+    } catch (error) {
+        console.error(`❌ System check error: ${error.message}`);
+        res.status(500).json({
+            success: false,
+            error: error.message,
+            message: 'System check failed'
+        });
+    }
+});
+
 // Test endpoint for debugging
 app.get('/api/bot/test', async (req, res) => {
     try {
@@ -685,6 +901,7 @@ app.get('/', (req, res) => {
         description: 'Bot server for scraping real Free Fire player data from Garena official website',
         endpoints: {
             health: '/api/bot/health',
+            systemCheck: '/api/bot/system-check',
             test: '/api/bot/test',
             scrape: '/api/bot/scrape (POST)'
         },
@@ -694,6 +911,7 @@ app.get('/', (req, res) => {
             headers: 'Content-Type: application/json'
         },
         debug: {
+            systemCheck: 'GET /api/bot/system-check to check Chrome installation',
             test: 'GET /api/bot/test to test bot functionality',
             screenshots: 'Debug screenshots are saved during scraping'
         }
